@@ -8,19 +8,17 @@ app = Flask(__name__)
 # --- CONFIGURACIÓN ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tienda.db'
 app.config['UPLOAD_FOLDER'] = 'static/img'
-# La secret_key es obligatoria para usar flash()
 app.secret_key = 'shopping_ropa_puesto_129_130' 
 
 db = SQLAlchemy(app)
 
-# --- MODELO DE PRODUCTO ---
+# --- MODELO DE PRODUCTO (Ajustado sin detalles) ---
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    precio = db.Column(db.String(20), nullable=False)
-    detalles = db.Column(db.String(200))
+    precio = db.Column(db.Float, nullable=False)
+    categoria = db.Column(db.String(50), nullable=False, default='Adulto')
     imagen = db.Column(db.String(100))
-    categoria = db.Column(db.String(50)) 
 
 # --- SEGURIDAD ---
 def check_auth(username, password):
@@ -38,7 +36,6 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-# Crear base de datos
 with app.app_context():
     db.create_all()
 
@@ -46,63 +43,90 @@ with app.app_context():
 @app.route('/')
 def index():
     productos = Producto.query.all()
-    # Separamos para que el index no mezcle ropa de nene con adulto
-    infantiles = [p for p in productos if p.categoria == 'infantil']
-    adultos = [p for p in productos if p.categoria == 'adulto']
+    # Filtramos para enviar las listas correctas al HTML
+    # Buscamos 'Nenes' o 'Nenas' para la sección infantil
+    infantiles = [p for p in productos if p.categoria in ['Nenes', 'Nenas']]
+    adultos = [p for p in productos if p.categoria == 'Adulto']
     return render_template('index.html', infantiles=infantiles, adultos=adultos)
 
-# --- RUTAS DE ADMINISTRACIÓN (CRUD) ---
+# --- RUTAS DE ADMINISTRACIÓN ---
 
 @app.route('/admin')
 @requires_auth
 def admin():
     productos = Producto.query.all()
-    infantil = [p for p in productos if p.categoria == 'infantil']
-    adulto = [p for p in productos if p.categoria == 'adulto']
-    return render_template('admin.html', infantil=infantil, adulto=adulto)
+    
+    # Contadores
+    total_infantil = Producto.query.filter(Producto.categoria.in_(['Nenes', 'Nenas', 'infantil'])).count()
+    total_adulto = Producto.query.filter(Producto.categoria.in_(['Adulto', 'adulto'])).count()
+    total_general = len(productos)
 
+    return render_template('admin.html', 
+                           productos=productos, 
+                           total_infantil=total_infantil, 
+                           total_adulto=total_adulto,
+                           total_general=total_general)
 @app.route('/add', methods=['POST'])
 @requires_auth
 def add_producto():
     nombre = request.form['nombre']
     precio = request.form['precio']
-    detalles = request.form['detalles']
     categoria = request.form['categoria'] 
     file = request.files['imagen']
     
     if file:
         filename = file.filename
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        nuevo = Producto(nombre=nombre, precio=precio, detalles=detalles, imagen=filename, categoria=categoria)
+        nuevo = Producto(nombre=nombre, precio=precio, imagen=filename, categoria=categoria)
         db.session.add(nuevo)
         db.session.commit()
         flash(f'✅ ¡"{nombre}" cargado con éxito!')
     return redirect(url_for('admin'))
 
+    @app.route('/update/<int:id>', methods=['POST'])
+    def update_producto(id):
+        prod = Producto.query.get(id)
+        if prod:
+            prod.nombre = request.form['nombre']
+            prod.precio = request.form['precio']
+            prod.categoria = request.form['categoria']
+            
+            file = request.files['imagen']
+            if file and file.filename != '':
+                filename = file.filename
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                prod.imagen = filename
+                
+            db.session.commit()
+        return redirect(url_for('admin'))
+    # RUTA 1: Muestra el formulario de edición (El que te da el error 404)
 @app.route('/editar/<int:id>')
 @requires_auth
-def edit_producto(id):
-    prod = db.session.get(Producto, id)
-    return render_template('editar.html', p=prod)
+def editar(id):
+    # Buscamos el producto por su ID
+    producto = Producto.query.get_or_404(id)
+    return render_template('editar.html', p=producto)
 
+# RUTA 2: Recibe los datos del formulario y los guarda
 @app.route('/update/<int:id>', methods=['POST'])
 @requires_auth
-def update_producto(id):
-    prod = db.session.get(Producto, id)
-    if prod:
-        prod.nombre = request.form['nombre']
-        prod.precio = request.form['precio']
-        prod.categoria = request.form['categoria']
-        prod.detalles = request.form['detalles']
-        
+def update(id):
+    producto = Producto.query.get_or_404(id)
+    
+    producto.nombre = request.form['nombre']
+    producto.precio = request.form['precio']
+    producto.categoria = request.form['categoria']
+    
+    # Manejo de la imagen opcional
+    if 'imagen' in request.files:
         file = request.files['imagen']
-        if file:
+        if file.filename != '':
             filename = file.filename
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            prod.imagen = filename
+            producto.imagen = filename
             
-        db.session.commit()
-        flash(f'💾 Actualizado: {prod.nombre}')
+    db.session.commit()
+    flash('✅ Producto actualizado correctamente')
     return redirect(url_for('admin'))
 
 @app.route('/delete/<int:id>')
