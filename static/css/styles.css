@@ -1,0 +1,558 @@
+/* =========================================
+    1. RESET Y CONFIGURACIÓN GLOBAL 
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url("../img/paseo33.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #ffffff;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* =========================================
+    2. NAVBAR FIJO
+   ========================================= */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid #ffffff; /* CAMBIO: De rojo a Blanco */
+    z-index: 2000;
+    padding: 15px 0;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.navbar-logo h1 {
+    color: #ffffff; /* CAMBIO: De dorado a Blanco */
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+}
+
+.navbar-menu {
+    display: flex;
+    list-style: none;
+    gap: 25px;
+}
+
+.navbar-link {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: 0.3s ease;
+}
+
+.navbar-link:hover {
+    color: #cccccc;
+}
+
+/* =========================================
+    3. HERO (INICIO)
+   ========================================= */
+/* =========================================
+    3. HERO (INICIO) CON IMAGEN DE PRENDAS
+   ========================================= */
+.hero {
+    height: 80vh; /* Un poco más alta para que luzca la foto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    margin-top: 60px;
+    
+    /* AQUÍ PONEMOS TU IMAGEN */
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url("../img/fronte.jpeg");
+    background-size: cover;
+    background-position: center;
+    border-bottom: 2px solid #ffffff; /* Separación elegante */
+}
+
+.hero h1 {
+    font-size: 4rem;
+    color: #ffffff;
+    text-shadow: 4px 4px 20px rgba(0,0,0,0.9); /* Sombra para que se lea bien sobre la foto */
+    margin-bottom: 10px;
+    font-weight: 900;
+}
+
+.subtitle {
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    color: #eee;
+}
+
+.btn-primary {
+    background: #ffffff; /* CAMBIO: De rojo a Blanco */
+    color: #000000;    /* CAMBIO: Letras negras */
+    border: 2px solid #ffffff;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    background: transparent;
+    border-color: #ffffff;
+    color: #ffffff;
+    transform: translateY(-3px);
+}
+
+/* =========================================
+    4. INFO CARDS
+   ========================================= */
+.info-general {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 40px 20px;
+}
+
+.info-card {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid #ffffff; /* CAMBIO: De dorado a Blanco */
+    padding: 20px;
+    border-radius: 12px;
+    width: 280px;
+    text-align: center;
+}
+
+.info-card h3 { color: #ffffff; margin-bottom: 5px; }
+
+/* =========================================
+    5. CATÁLOGO CON IMÁGENES GIGANTES Y ZOOM
+   ========================================= */
+.puesto-section {
+    padding: 80px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.puesto-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.puesto-header h2 {
+    color: #ffffff; /* CAMBIO: Blanco */
+    font-size: 3rem;
+    text-transform: uppercase;
+}
+
+.catalogo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 40px;
+}
+
+.producto-card {
+    background: #111;
+    border: 1px solid #f0e6e6;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    transition: 0.4s;
+}
+
+.producto-card:hover {
+    border-color: #ffffff; /* CAMBIO: Blanco */
+    transform: translateY(-10px);
+}
+
+.img-container {
+    width: 100%;
+    height: 480px; 
+    overflow: hidden;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    background: #000;
+}
+
+.producto-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s ease;
+}
+
+/* ZOOM GIGANTE - SE MANTIENE TUYO */
+.producto-card:hover .producto-img {
+    transform: scale(1.4);
+}
+
+.precio {
+    display: block;
+    font-size: 2.2rem;
+    color: #ffffff; /* CAMBIO: Blanco */
+    margin: 10px 0;
+    font-weight: 900;
+}
+
+.detalles { color: #aaa; font-weight: bold; }
+
+.btn-whatsapp-small {
+    background: #25D366;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.btn-whatsapp-small:hover {
+    filter: brightness(1.2);
+    transform: scale(1.02);
+}
+
+/* =========================================
+    6. FORMULARIO DE PEDIDO
+   ========================================= */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #ffffff; /* CAMBIO: Blanco */
+}
+
+input, textarea, select {
+    margin-bottom: 15px;
+    font-size: 1rem;
+    outline: none;
+    background: #111;
+    color: #fff;
+    border: 1px solid #333;
+    padding: 10px;
+    width: 100%;
+}
+
+input:focus, textarea:focus {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* =========================================
+    7. FOOTER Y CONTACTO (TU DISEÑO FIRME)
+   ========================================= */
+.contacto {
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.contacto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.contacto-card {
+    background: rgba(20, 20, 20, 0.8);
+    padding: 30px;
+    border-radius: 15px;
+    border-left: 5px solid #ffffff; /* CAMBIO: Blanco */
+}
+
+.footer-final {
+    background: #000000;
+    padding: 60px 20px 30px;
+    border-top: 4px solid #ffffff; /* CAMBIO: Blanco */
+    margin-top: 100px;
+    width: 100%;
+    clear: both;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 40px;
+    text-align: left;
+}
+
+.footer-column {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-column h2, .footer-column h3 {
+    color: #ffffff; /* CAMBIO: Blanco */
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.footer-social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.social-btn {
+    display: inline-block;
+    color: #ffffff;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    transition: 0.3s ease;
+    width: fit-content;
+    font-weight: 500;
+}
+
+.social-btn:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #222;
+    color: #777;
+    width: 100%;
+}
+
+.seccion-oculta { display: none !important; }
+
+/* Botón flotante WhatsApp */
+.whatsapp-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #25D366;
+    color: white;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 35px;
+    text-decoration: none;
+    z-index: 4000;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    transition: 0.3s;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1);
+}
+/* =========================================
+    6. FORMULARIO DE PEDIDO (RESTABLECIDO)
+   ========================================= */
+.formulario-pedido {
+    max-width: 800px;
+    margin: 60px auto;
+    padding: 40px;
+    background: rgba(15, 15, 15, 0.95);
+    border: 1px solid #333;
+    border-radius: 20px;
+}
+
+.formulario-pedido h2 {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    text-transform: uppercase;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.formulario-pedido label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.formulario-pedido input, 
+.formulario-pedido textarea, 
+.formulario-pedido select {
+    width: 100%;
+    padding: 12px 15px;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+.formulario-pedido input:focus, 
+.formulario-pedido textarea:focus {
+    border-color: #ffffff;
+    box-shadow: 0 0 10px rgba(241, 239, 239, 0.1);
+}
+
+.btn-enviar-pedido {
+    width: 100%;
+    background: #ffffff;
+    color: #000;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 1rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-enviar-pedido:hover {
+    background: #cccccc;
+    transform: translateY(-2px);
+}
+
+/* Ajustes Móvil */
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .footer-social-links {
+        align-items: center;
+    }
+    .social-btn {
+        width: 200px;
+    }
+}
+/* =========================================
+    8. RESPONSIVE DESIGN (AJUSTES MÓVIL)
+   ========================================= */
+
+@media (max-width: 768px) {
+    /* Ajuste de Texto Hero */
+    .hero h1 {
+        font-size: 2.5rem; /* Achicamos el título para que no se corte */
+    }
+    
+    .subtitle {
+        font-size: 1.1rem;
+    }
+
+    /* Navbar en Móvil */
+    .navbar-container {
+        flex-direction: column; /* Logo arriba, menú abajo */
+        padding: 10px;
+    }
+
+    .navbar-menu {
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .navbar-link {
+        font-size: 0.9rem;
+    }
+
+    /* Catálogo en Celulares */
+    .catalogo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Tarjetas un poco más angostas */
+        gap: 20px;
+    }
+
+    .img-container {
+        height: 350px; /* Bajamos la altura de la imagen para que no ocupe toda la pantalla */
+    }
+
+    /* Desactivamos el Zoom Gigante en móvil para evitar tirones */
+    .producto-card:hover .producto-img {
+        transform: scale(1.1); /* Un zoom mucho más leve */
+    }
+
+    .puesto-header h2 {
+        font-size: 2rem;
+    }
+
+    .precio {
+        font-size: 1.8rem;
+    }
+
+    /* Info Cards (Envios, Pagos, etc) */
+    .info-general {
+        gap: 10px;
+    }
+    
+    .info-card {
+        width: 100%; /* Una card debajo de la otra */
+        max-width: 320px;
+    }
+
+    /* Formulario de Pedido */
+    .formulario-pedido {
+        padding: 20px;
+        margin: 30px 10px;
+    }
+
+    /* Botón flotante de WhatsApp más pequeño para no tapar contenido */
+    .whatsapp-float {
+        width: 55px;
+        height: 55px;
+        font-size: 30px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    /* Footer */
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .footer-social-links {
+        align-items: center;
+    }
+    .social-btn {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+
+/* Ajuste para pantallas muy pequeñas (iPhone SE o similares) */
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+    .img-container {
+        height: 300px;
+    }
+}

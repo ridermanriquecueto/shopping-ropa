@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Producto - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body { background-color: #000; color: white; font-family: sans-serif; }
+        .edit-container { max-width: 500px; margin: 50px auto; padding: 30px; background: #111; border: 1px solid #333; border-radius: 12px; }
+        h2 { color: #ffcc00; text-align: center; margin-bottom: 25px; }
+        label { color: #888; font-size: 0.9rem; display: block; margin-top: 15px; }
+        input, textarea, select { 
+            width: 100%; padding: 12px; margin-top: 5px; 
+            background: #000; color: white; border: 1px solid #444; border-radius: 6px; 
+        }
+        .current-img { width: 100px; height: 100px; object-fit: cover; margin: 10px 0; border-radius: 8px; border: 1px solid #444; }
+        .btn-save { background: #ffcc00; color: black; border: none; padding: 15px; font-weight: bold; cursor: pointer; width: 100%; border-radius: 6px; margin-top: 20px; font-size: 1rem; }
+        .btn-cancel { display: block; text-align: center; color: #888; text-decoration: none; margin-top: 15px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="edit-container">
+        <h2>📝 Editar Producto</h2>
+        <form action="/update/{{ p.id }}" method="POST" enctype="multipart/form-data">
+            
+            <label>Nombre del Producto:</label>
+            <input type="text" name="nombre" value="{{ p.nombre }}" required>
+
+            <label>Precio:</label>
+            <input type="text" name="precio" value="{{ p.precio }}" required>
+
+            <label>Categoría:</label>
+            <select name="categoria">
+                <option value="infantil" {% if p.categoria == 'infantil' %}selected{% endif %}>👶 Puesto 129 - Infantil</option>
+                <option value="adulto" {% if p.categoria == 'adulto' %}selected{% endif %}>👕 Puesto 130 - Adulto</option>
+            </select>
+
+            <label>Detalles (Talles, telas, etc):</label>
+            <textarea name="detalles" rows="3">{{ p.detalles }}</textarea>
+
+            <label>Imagen Actual:</label>
+            <img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="current-img">
+            
+            <label>Cambiar Imagen (opcional):</label>
+            <input type="file" name="imagen">
+
+            <button type="submit" class="btn-save">GUARDAR CAMBIOS</button>
+            <a href="/admin" class="btn-cancel">Cancelar y Volver</a>
+        </form>
+    </div>
+
+</body>
+</html>
