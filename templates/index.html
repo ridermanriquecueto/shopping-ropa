@@ -6,15 +6,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
+        /* Agregado para que las secciones se oculten de verdad */
+        .seccion-oculta { display: none !important; }
+        
         .filtro-container { text-align: center; margin: 15px 0 25px 0; }
         .btn-filtro {
             padding: 10px 20px; border: none; border-radius: 25px; color: white;
             font-weight: bold; margin: 5px; cursor: pointer; background: #444; transition: 0.3s;
         }
         .btn-filtro:hover { opacity: 0.8; transform: scale(1.05); }
+        
+        .producto-card { border: 1px solid #222; padding: 15px; border-radius: 12px; background: #0a0a0a; position: relative; margin-bottom: 20px; }
+        .img-container { position: relative; height: 320px; display: flex; align-items: center; overflow: hidden; border-radius: 8px; }
+        .producto-img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-flecha { position: absolute; z-index: 10; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
+        .btn-flecha:hover { background: rgba(0,180,255,0.8); }
+        .thumb-img { width: 40px; height: 40px; border-radius: 4px; cursor: pointer; border: 1px solid #444; object-fit: cover; }
+        .thumb-img:hover { border-color: #00d4ff; }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+        }
+        .badge-oferta {
+            position: absolute; top: 15px; left: 15px; background: #ff4444; color: white;
+            padding: 5px 12px; border-radius: 6px; font-weight: bold; z-index: 20;
+            font-size: 0.85rem; animation: pulse-red 2s infinite; border: 1px solid white;
+        }
+
+        .whatsapp-menu-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; }
+        .whatsapp-options { display: none; flex-direction: column; gap: 10px; margin-bottom: 15px; transition: 0.3s; }
+        .whatsapp-options.show { display: flex; }
+        .wa-option { background: #25d366; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); white-space: nowrap; transition: 0.3s; }
+        .wa-option.infantil { background: #00d4ff; color: #000; }
+        .wa-option.adulto { background: #ffcc00; color: #000; }
+        .wa-option:hover { transform: scale(1.05); }
+        .whatsapp-float { width: 60px; height: 60px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 3px #999; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    {% macro render_producto(p, tel, nombre_vendedora) %}
+    <div class="producto-card" data-categoria="{{ p.categoria }}">
+        {% if p.oferta %}<div class="badge-oferta">🔥 OFERTA</div>{% endif %}
+        <div class="img-container">
+            <button class="btn-flecha" style="left: 5px;" onclick="pasarFoto('{{ p.id }}', -1)">❮</button>
+            <img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="producto-img" id="main-{{ p.id }}" data-index="0">
+            <button class="btn-flecha" style="right: 5px;" onclick="pasarFoto('{{ p.id }}', 1)">❯</button>
+        </div>
+        <div id="lista-{{ p.id }}" style="display: none;">
+            <span>{{ url_for('static', filename='img/' + p.imagen) }}</span>
+            {% if p.img2 %}<span>{{ url_for('static', filename='img/' + p.img2) }}</span>{% endif %}
+            {% if p.img3 %}<span>{{ url_for('static', filename='img/' + p.img3) }}</span>{% endif %}
+            {% if p.img4 %}<span>{{ url_for('static', filename='img/' + p.img4) }}</span>{% endif %}
+            {% if p.img5 %}<span>{{ url_for('static', filename='img/' + p.img5) }}</span>{% endif %}
+            {% if p.img6 %}<span>{{ url_for('static', filename='img/' + p.img6) }}</span>{% endif %}
+        </div>
+        <div class="galeria-miniaturas" style="display: flex; gap: 4px; margin-top: 8px; justify-content: center; flex-wrap: wrap;">
+            <img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="thumb-img" onclick="actualizarFotoCarrusel('{{ p.id }}', 0)">
+            {% if p.img2 %}<img src="{{ url_for('static', filename='img/' + p.img2) }}" class="thumb-img" onclick="actualizarFotoCarrusel('{{ p.id }}', 1)">{% endif %}
+            {% if p.img3 %}<img src="{{ url_for('static', filename='img/' + p.img3) }}" class="thumb-img" onclick="actualizarFotoCarrusel('{{ p.id }}', 2)">{% endif %}
+        </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <h3 style="font-size: 1.1rem; color: white;">{{ p.nombre }}</h3>
+            <p style="color: #00d4ff; font-weight: bold; font-size: 1.2rem; margin: 5px 0;">${{ p.precio }}</p>
+            <a href="https://wa.me/{{ tel }}?text=Hola {{ nombre_vendedora }}, consulto por: {{ p.nombre }}" 
+               class="btn-whatsapp-small" target="_blank" style="background:#25d366; color:white; padding:8px 15px; border-radius:5px; text-decoration:none; display:inline-block; font-size:0.9rem; font-weight:bold;">
+               Consultar WhatsApp
+            </a>
+        </div>
+    </div>
+    {% endmacro %}
 
     <nav class="navbar">
         <div class="navbar-container">
@@ -24,51 +87,62 @@
                 <li><a href="javascript:void(0)" onclick="mostrarSeccion('infantil')" class="navbar-link">👶 Infantil</a></li>
                 <li><a href="javascript:void(0)" onclick="mostrarSeccion('adultos')" class="navbar-link">👕 Adultos</a></li>
                 <li><a href="javascript:void(0)" onclick="mostrarSeccion('hacer-pedido')" class="navbar-link">📝 Pedidos</a></li>
-                <li><a href="javascript:void(0)" onclick="mostrarSeccion('contacto')" class="navbar-link">📞 Contacto</a></li>
+                <li><a href="javascript:void(0)" onclick="mostrarSeccion('contacto-page')" class="navbar-link">📞 Contacto</a></li>
             </ul>
         </div>
     </nav>
 
-    <section class="hero" id="inicio">
+     <section id="inicio" class="hero">
         <div class="hero-content">
-            <h1>🛍️ SHOPPING ROPA</h1>
-            <p class="subtitle">Tu destino de moda en el Paseo de Compras La 33</p>
-            <div class="hero-buttons">
-                <a href="javascript:void(0)" onclick="mostrarSeccion('infantil')" class="btn btn-primary">👶 Ver Ropa Infantil</a>
-                <a href="javascript:void(0)" onclick="mostrarSeccion('adultos')" class="btn btn-primary">👕 Ver Ropa Adultos</a>
+            <div class="hero-text-card">
+                <span class="badge-nuevo">TEMPORADA 2026</span>
+                <h1>🛍️ SHOPPING ROPA</h1>
+                <p class="subtitle" style="color: #fff; font-size: 1.3rem; margin-bottom: 5px;">Moda y calidad en el Paseo de Compras La 33</p>
+                <p style="color: #00d4ff; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px;">📍 Puestos 129 y 130</p>
+            </div>
+
+            <div class="category-selector">
+                <div class="cat-card" onclick="mostrarSeccion('infantil')">
+                    <div class="cat-icon" style="font-size: 3.5rem;">👶</div>
+                    <h3 style="color: #fff;">INFANTIL</h3>
+                    <span class="cat-btn">VER CATÁLOGO</span>
+                </div>
+
+                <div class="cat-card" onclick="mostrarSeccion('adultos')">
+                    <div class="cat-icon" style="font-size: 3.5rem;">👕</div>
+                    <h3 style="color: #fff;">ADULTOS</h3>
+                    <span class="cat-btn">VER CATÁLOGO</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; margin-bottom: 30px;">
+                <a href="https://www.google.com/maps/dir/?api=1&destination=-34.9392,-57.9944" 
+                target="_blank" 
+                class="btn-gps">
+                    🚀 INICIAR GPS (CÓMO LLEGAR)
+                </a>
+            </div>
+
+            <div class="benefits-strip">
+                <div class="benefit-item"><span>💳</span><p>Cuenta DNI / Transf.</p></div>
+                <div class="benefit-item"><span>✅</span><p>Atención Personalizada</p></div>
             </div>
         </div>
     </section>
+        
 
-    <section class="info-general">
-        <div class="info-card"><h3>📍 Ubicación</h3><p>Paseo de Compras La 33</p><p>33 y 134, La Plata</p></div>
-        <div class="info-card"><h3>🕐 Horarios</h3><p>Jueves a Domingo</p><p><strong>10:00 a 20:00 hs</strong></p></div>
-        <div class="info-card"><h3>💳 Pagos</h3><p>Efectivo / Transferencia / QR</p></div>
-    </section>
-    
     <section id="infantil" class="puesto-section seccion-oculta">
         <div class="puesto-header">
             <h2>👶 INDUMENTARIA POPY</h2>
             <p class="puesto-subtitulo">Puesto 129 - Talles 4 al 16</p>
         </div>
-
         <div class="filtro-container">
             <button onclick="filtrarInfantil('todos')" class="btn-filtro">Todo Infantil</button>
             <button onclick="filtrarInfantil('Nenes')" class="btn-filtro" style="background:#00d4ff;">👦 Nenes</button>
             <button onclick="filtrarInfantil('Nenas')" class="btn-filtro" style="background:#ff69b4;">👧 Nenas</button>
         </div>
-
         <div class="catalogo-grid" id="grid-infantil">
-            {% for p in infantiles %}
-            <div class="producto-card" data-categoria="{{ p.categoria }}">
-                <div class="img-container">
-                    <img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="producto-img">
-                </div>
-                <h3>{{ p.nombre }}</h3>
-                <span class="precio">${{ p.precio }}</span>
-                <a href="https://wa.me/5492216769436?text=Hola Popy, consulto por: {{ p.nombre }}" class="btn-whatsapp-small" target="_blank">Consultar</a>
-            </div>
-            {% endfor %}
+            {% for p in infantiles %} {{ render_producto(p, '5492216769436', 'Popy') }} {% endfor %}
         </div>
     </section>
 
@@ -77,194 +151,199 @@
             <h2>👕 INDUMENTARIA DANIELA</h2>
             <p class="puesto-subtitulo">Puesto 130 - Talles S al XXL</p>
         </div>
-        <div class="catalogo-grid">
-            {% for p in adultos %}
-            <div class="producto-card">
-                <div class="img-container">
-                    <img src="{{ url_for('static', filename='img/' + p.imagen) }}" alt="{{ p.nombre }}" class="producto-img">
-                </div>
-                <h3>{{ p.nombre }}</h3>
-                <span class="precio">${{ p.precio }}</span>
-                <a href="https://wa.me/5492215570548?text=Hola Daniela, consulto por: {{ p.nombre }}" class="btn-whatsapp-small" target="_blank">Consultar</a>
-            </div>
-            {% endfor %}
+        <div class="catalogo-grid" id="grid-adultos">
+            {% for p in adultos %} {{ render_producto(p, '5492215570548', 'Daniela') }} {% endfor %}
         </div>
     </section>
 
-    <section id="hacer-pedido" class="contacto seccion-oculta">
-        <div class="puesto-header">
-            <h2>📝 HACER UN PEDIDO</h2>
-            <p>Ahorrá tiempo: armá tu lista y pasá a retirar</p>
+    <section id="hacer-pedido" class="puesto-section seccion-oculta">
+        <div class="formulario-pedido">
+            <h2>📝 TU PEDIDO</h2>
+            <p style="text-align: center; color: #888; margin-top: -30px; margin-bottom: 30px;">
+                Completá los datos y enviá tu lista por WhatsApp.
+            </p>
+
+            <div class="form-group">
+                <label>👤 Tu Nombre</label>
+                <input type="text" id="cliente_nombre" placeholder="Ej: Juan Pérez">
+            </div>
+
+            <div class="form-group">
+                <label>🏢 ¿A qué puesto querés comprar?</label>
+                <select id="destino_pedido">
+                    <option value="5492216769436">Infantil (Puesto 129 - Popy)</option>
+                    <option value="5492215570548">Adultos (Puesto 130 - Daniela)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>💬 Lista de prendas y talles</label>
+                <textarea id="cliente_pedido" rows="6" placeholder="Ej: 2 remeras talle 10 nene, 1 jean talle 42 dama..."></textarea>
+            </div>
+
+            <button onclick="enviarPedido()" class="btn-enviar-pedido">
+                🚀 ENVIAR PEDIDO POR WHATSAPP
+            </button>
         </div>
-        <div class="contacto-card" style="max-width: 600px; margin: 0 auto; text-align: left;">
-            <form id="formPedido">
-                <div style="margin-bottom: 15px;">
-                    <label>Nombre Completo:</label>
-                    <input type="text" id="cliente_nombre" placeholder="Tu nombre" style="width:100%; padding:10px; border-radius:5px; border:1px solid #444; background:#222; color:white;" required>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label>¿A qué puesto va el pedido?</label>
-                    <select id="destino_pedido" style="width:100%; padding:10px; border-radius:5px; border:1px solid #444; background:#222; color:white;">
-                        <option value="2216769436">👶 Puesto 129 - Infantil (Popy)</option>
-                        <option value="2215570548">👕 Puesto 130 - Adultos (Daniela)</option>
-                    </select>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label>Prendas y Talles:</label>
-                    <textarea id="cliente_pedido" rows="4" placeholder="Ej: 2 Vestidos talle 10..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #444; background:#222; color:white;" required></textarea>
-                </div>
-                <button type="button" onclick="enviarPedido()" class="btn-whatsapp-small" style="width:100%; font-size: 1.2rem; cursor:pointer;">
-                    🚀 Enviar Pedido por WhatsApp
-                </button>
+    </section>
+    <section id="contacto-page" class="puesto-section" style="display: none; padding: 100px 20px 60px;">
+    
+    <div class="puesto-header" style="text-align: center; margin-bottom: 30px;">
+        <h2 style="color: #00d4ff; font-size: 1.8rem;">📞 CENTRO DE ATENCIÓN</h2>
+        <p style="color: #ccc; font-size: 0.9rem;">Estamos para ayudarte.</p>
+    </div>
+
+    <div class="contacto-grid">
+        <div class="card-atencion">
+            <h3 style="color: #25d366; font-size: 1rem; margin-bottom: 20px;">💬 WHATSAPP DIRECTO</h3>
+            <div class="wa-buttons-container">
+                <a href="https://wa.me/5492216769436" target="_blank" class="btn-atencion-wa-mini">👶 Popy (129)</a>
+                <a href="https://wa.me/5492215570548" target="_blank" class="btn-atencion-wa-mini">👕 Dani (130)</a>
+            </div>
+        </div>
+
+        <div class="card-atencion">
+            <h3 style="color: #fff; font-size: 1rem; margin-bottom: 15px;">📧 ENVIAR CONSULTA</h3>
+            <form action="mailto:tu-correo@gmail.com" method="post" enctype="text/plain">
+                <input type="text" name="Nombre" placeholder="Tu Nombre" required style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff; border-radius:8px;">
+                <textarea name="Mensaje" placeholder="Tu consulta..." rows="3" required style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff; border-radius:8px; resize:none;"></textarea>
+                <button type="submit" style="width:100%; background:#00d4ff; color:#000; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">ENVIAR CORREO</button>
             </form>
         </div>
-    </section>
+    </div>
 
-    <section id="contacto" class="contacto seccion-oculta">
-        <h2>📞 CONTACTO DIRECTO</h2>
-        <div class="contacto-grid">
-            <div class="contacto-card">
-                <h3>👶 Puesto 129 (Popy)</h3>
-                <a href="https://wa.me/5492216769436" class="btn-whatsapp-small" target="_blank">WhatsApp Popy</a>
+    <div class="caja-quejas-mini">
+        <h3 style="color: #ff4444; font-size: 0.9rem; margin-bottom: 5px;">⚠️ ¿QUEJAS O SUGERENCIAS?</h3>
+        <p style="font-size: 1.5rem; color: #fff; font-weight: 900; margin: 5px 0;">📞 221-XXXXXXX</p>
+    </div>
+</section>
+    <footer class="footer-moderno">
+        <div class="footer-container">
+            
+            <div class="footer-col">
+                <h2 class="footer-logo">🛍️ SHOPPING ROPA</h2>
+                <p style="color: #ccc; line-height: 1.8;">
+                    📍 <strong>VISÍTANOS:</strong><br>
+                    Paseo de Compras La 33<br>
+                    Calle 33 y 134, La Plata.<br>
+                    <span style="color: #00d4ff; font-weight: bold; font-size: 1.1rem;">Puestos 129 y 130</span>
+                </p>
             </div>
-            <div class="contacto-card">
-                <h3>👕 Puesto 130 (Daniela)</h3>
-                <a href="https://wa.me/5492215570548" class="btn-whatsapp-small" target="_blank">WhatsApp Daniela</a>
+
+            <div class="footer-col">
+                <h4>SÍGUENOS</h4>
+                <div class="redes-lista">
+                    <a href="https://instagram.com/TU_USUARIO" target="_blank" class="red-link">📸 Instagram</a>
+                    <a href="https://facebook.com/TU_USUARIO" target="_blank" class="red-link">🔵 Facebook</a>
+                    <a href="https://tiktok.com/@TU_USUARIO" target="_blank" class="red-link">🎵 TikTok</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>🕒 HORARIOS</h4>
+                <p style="color: #aaa; line-height: 2;">
+                    Sábados: <span style="color:#fff">10 a 20 hs</span><br>
+                    Domingos: <span style="color:#fff">10 a 20 hs</span><br>
+                    Feriados: <span style="color:#00d4ff">Consultar</span>
+                </p>
             </div>
         </div>
-    </section>
 
-    <footer style="background: #000; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid #222;">
-        <div style="max-width: 1000px; margin: auto;">
-            <h2 style="color: #00d4ff;">🛍️ SHOPPING ROPA</h2>
-            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 30px;">
-                <div style="margin: 10px;">
-                    <h4>SÍGUENOS</h4>
-                    <a href="#" style="color: #eee; text-decoration: none; display: block;">📸 Instagram</a>
-                </div>
-                <div style="margin: 10px;">
-                    <h4>📍 VISÍTANOS</h4>
-                    <p style="margin:0;">Calle 33 y 134, La Plata</p>
-                    <p style="margin:0; color: #00d4ff;">Puestos 129 y 130</p>
-                </div>
-            </div>
-            <p style="color: #444; font-size: 0.8rem; margin-top: 30px;">© 2026 Shopping Ropa. <a href="/admin" style="color: #222; text-decoration: none;">Acceso Admin</a></p>
+        <div class="footer-info-extra">
+            <p style="color: #444; font-size: 0.85rem; margin-bottom: 15px;">
+                © 2026 Shopping Ropa. Todos los derechos reservados.
+            </p>
+            <a href="{{ url_for('admin') }}" class="admin-secret-link">🔒 ACCESO ADMIN</a>
         </div>
     </footer>
+    
 
-        <div class="whatsapp-menu-container">
+    <div class="whatsapp-menu-container">
         <div class="whatsapp-options" id="waOptions">
-            <a href="https://wa.me/5492216769436" target="_blank" class="wa-option infantil">
-                👶 Infantil (Popy)
-            </a>
-            <a href="https://wa.me/5492215570548" target="_blank" class="wa-option adulto">
-                👕 Adulto (Daniela)
-            </a>
+            <a href="https://wa.me/5492216769436" class="wa-option infantil" target="_blank">👶 Popy</a>
+            <a href="https://wa.me/5492215570548" class="wa-option adulto" target="_blank">👕 Daniela</a>
         </div>
         <button class="whatsapp-float" onclick="toggleWaMenu()">💬</button>
     </div>
+    
 
     <script>
-        function toggleWaMenu() {
-            const options = document.getElementById('waOptions');
-            options.classList.toggle('show');
+    function mostrarSeccion(id) {
+    // 1. Lista de todos los IDs
+    const idsPosibles = ['inicio', 'infantil', 'adultos', 'hacer-pedido', 'contacto-page'];
+
+    idsPosibles.forEach(seccionId => {
+        const el = document.getElementById(seccionId);
+        if (el) {
+            el.style.display = 'none';
+            el.classList.add('seccion-oculta');
+        }
+    });
+
+    // 2. Mostrar la elegida con el diseño correcto
+    const target = document.getElementById(id);
+    if (target) {
+        target.classList.remove('seccion-oculta');
+        
+        // Si es el INICIO, usamos FLEX para que se centre todo
+        if (id === 'inicio') {
+            target.style.display = 'flex';
+            target.style.flexDirection = 'column';
+            target.style.alignItems = 'center';
+            target.style.justifyContent = 'center';
+        } else {
+            // Para las demás secciones usamos block o flex según prefieras
+            target.style.display = 'block';
         }
         
-        // Cerrar si hace clic afuera
-        window.onclick = function(event) {
-            if (!event.target.matches('.whatsapp-float')) {
-                const options = document.getElementById('waOptions');
-                if (options.classList.contains('show')) {
-                    options.classList.remove('show');
-                }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+    // --- El resto de tus funciones se mantienen igual ---
+
+    function filtrarInfantil(categoria) {
+        const productos = document.querySelectorAll('#grid-infantil .producto-card');
+        productos.forEach(p => {
+            const pCat = p.getAttribute('data-categoria');
+            if (categoria === 'todos' || pCat === categoria) {
+                p.style.display = 'block';
+            } else {
+                p.style.display = 'none';
             }
+        });
+    }
+
+    function actualizarFotoCarrusel(prodId, nuevoIndex) {
+        const listaFotos = document.querySelectorAll(`#lista-${prodId} span`);
+        const imgPrincipal = document.getElementById(`main-${prodId}`);
+        if (imgPrincipal) {
+            if (nuevoIndex >= listaFotos.length) nuevoIndex = 0;
+            if (nuevoIndex < 0) nuevoIndex = listaFotos.length - 1;
+            imgPrincipal.src = listaFotos[nuevoIndex].innerText;
+            imgPrincipal.setAttribute('data-index', nuevoIndex);
         }
-    </script>
+    }
 
-    <script>
-        function mostrarSeccion(id) {
-            document.querySelectorAll('.puesto-section, .contacto').forEach(sec => sec.classList.add('seccion-oculta'));
-            if (id !== 'inicio') {
-                const seleccionada = document.getElementById(id);
-                if (seleccionada) {
-                    seleccionada.classList.remove('seccion-oculta');
-                    seleccionada.scrollIntoView({ behavior: 'smooth' });
-                }
-            } else { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function pasarFoto(prodId, direccion) {
+        const imgPrincipal = document.getElementById(`main-${prodId}`);
+        if (imgPrincipal) {
+            const currentIndex = parseInt(imgPrincipal.getAttribute('data-index') || 0);
+            actualizarFotoCarrusel(prodId, currentIndex + direccion);
         }
-
-        function filtrarInfantil(cat) {
-            const productos = document.querySelectorAll('#grid-infantil .producto-card');
-            productos.forEach(p => {
-                const pCat = p.getAttribute('data-categoria');
-                p.style.display = (cat === 'todos' || pCat === cat) ? "block" : "none";
-            });
-        }
-
-        function enviarPedido() {
-            const nombre = document.getElementById('cliente_nombre').value;
-            const pedido = document.getElementById('cliente_pedido').value;
-            const telefono = document.getElementById('destino_pedido').value; 
-            if(nombre === "" || pedido === "") { alert("Completá los campos"); return; }
-            const mensaje = `Hola! Soy ${nombre}. Mi pedido es: ${pedido}`;
-            window.open(`https://wa.me/549${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-        }
-    </script>
-    <style>
-    /* Estilos para el menú de WhatsApp flotante */
-    .whatsapp-menu-container {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
     }
 
-    .whatsapp-options {
-        display: none;
-        flex-direction: column;
-        gap: 10px;
-        margin-bottom: 15px;
-        transition: 0.3s;
+    function toggleWaMenu() { 
+        document.getElementById('waOptions').classList.toggle('show'); 
     }
 
-    .whatsapp-options.show {
-        display: flex;
+    function enviarPedido() {
+        const nombre = document.getElementById('cliente_nombre').value;
+        const pedido = document.getElementById('cliente_pedido').value;
+        const telefono = document.getElementById('destino_pedido').value; 
+        if(!nombre || !pedido) { alert("Completá los campos."); return; }
+        window.open(`https://wa.me/${telefono}?text=${encodeURIComponent('Hola! Soy '+nombre+'. Pedido: '+pedido)}`, '_blank');
     }
-
-    .wa-option {
-        background: #25d366;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        white-space: nowrap;
-        transition: 0.3s;
-    }
-
-    .wa-option.infantil { background: #00d4ff; color: #000; }
-    .wa-option.adulto { background: #ffcc00; color: #000; }
-
-    .wa-option:hover { transform: scale(1.05); }
-
-    /* Tu estilo actual del botón redondo */
-    .whatsapp-float {
-        width: 60px;
-        height: 60px;
-        background-color: #25d366;
-        color: #FFF;
-        border-radius: 50px;
-        text-align: center;
-        font-size: 30px;
-        box-shadow: 2px 2px 3px #999;
-        border: none;
-        cursor: pointer;
-    }
-</style>
+</script>
 </body>
 </html>

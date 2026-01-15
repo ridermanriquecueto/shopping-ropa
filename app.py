@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, Response, flash
+from sqlalchemy import func
 import os
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -12,13 +14,20 @@ app.secret_key = 'shopping_ropa_puesto_129_130'
 
 db = SQLAlchemy(app)
 
-# --- MODELO DE PRODUCTO (Ajustado sin detalles) ---
+# --- MODELO DE PRODUCTO ---
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Float, nullable=False)
     categoria = db.Column(db.String(50), nullable=False, default='Adulto')
+    stock = db.Column(db.Integer, default=1)
     imagen = db.Column(db.String(100))
+    img2 = db.Column(db.String(100), nullable=True)
+    img3 = db.Column(db.String(100), nullable=True)
+    img4 = db.Column(db.String(100), nullable=True)
+    img5 = db.Column(db.String(100), nullable=True)
+    img6 = db.Column(db.String(100), nullable=True)
+    oferta = db.Column(db.Boolean, default=False)
 
 # --- SEGURIDAD ---
 def check_auth(username, password):
@@ -36,17 +45,13 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-with app.app_context():
-    db.create_all()
-
+ 
 # --- RUTA PÚBLICA (CLIENTES) ---
 @app.route('/')
 def index():
     productos = Producto.query.all()
-    # Filtramos para enviar las listas correctas al HTML
-    # Buscamos 'Nenes' o 'Nenas' para la sección infantil
-    infantiles = [p for p in productos if p.categoria in ['Nenes', 'Nenas']]
-    adultos = [p for p in productos if p.categoria == 'Adulto']
+    infantiles = [p for p in productos if p.categoria in ['Nenes', 'Nenas', 'Infantil']]
+    adultos = [p for p in productos if p.categoria in ['Adulto', 'Adultos']]
     return render_template('index.html', infantiles=infantiles, adultos=adultos)
 
 # --- RUTAS DE ADMINISTRACIÓN ---
@@ -56,89 +61,102 @@ def index():
 def admin():
     productos = Producto.query.all()
     
-    # Contadores
-    total_infantil = Producto.query.filter(Producto.categoria.in_(['Nenes', 'Nenas', 'infantil'])).count()
-    total_adulto = Producto.query.filter(Producto.categoria.in_(['Adulto', 'adulto'])).count()
-    total_general = len(productos)
+    # SUMA DE UNIDADES (Stock real)
+    total_infantil = db.session.query(func.sum(Producto.stock)).filter(Producto.categoria.in_(['Nenes', 'Nenas', 'Infantil'])).scalar() or 0
+    total_adulto = db.session.query(func.sum(Producto.stock)).filter(Producto.categoria.in_(['Adulto', 'Adultos'])).scalar() or 0
+    total_general = db.session.query(func.sum(Producto.stock)).scalar() or 0
 
     return render_template('admin.html', 
                            productos=productos, 
                            total_infantil=total_infantil, 
                            total_adulto=total_adulto,
                            total_general=total_general)
+
 @app.route('/add', methods=['POST'])
 @requires_auth
 def add_producto():
     nombre = request.form['nombre']
     precio = request.form['precio']
-    categoria = request.form['categoria'] 
-    file = request.files['imagen']
+    categoria = request.form['categoria']
+    stock = request.form.get('stock', 1) 
+    es_oferta = True if request.form.get('oferta') else False
     
-    if file:
-        filename = file.filename
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        nuevo = Producto(nombre=nombre, precio=precio, imagen=filename, categoria=categoria)
-        db.session.add(nuevo)
-        db.session.commit()
-        flash(f'✅ ¡"{nombre}" cargado con éxito!')
+    # 1. Foto Principal
+    f_principal = request.files['imagen']
+    filename_p = secure_filename(f_principal.filename)
+    f_principal.save(os.path.join(app.config['UPLOAD_FOLDER'], filename_p))
+    
+    # 2. Fotos Extras
+    extras = {}
+    for i in range(2, 7):
+        campo = f'img{i}'
+        file = request.files.get(campo)
+        if file and file.filename != '':
+            fname = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
+            extras[campo] = fname
+        else:
+            extras[campo] = None
+
+    # 3. Guardar en la Base de Datos
+    nuevo_p = Producto(
+        nombre=nombre, 
+        precio=float(precio), 
+        categoria=categoria, 
+        stock=int(stock),
+        imagen=filename_p,
+        img2=extras['img2'], img3=extras['img3'], img4=extras['img4'],
+        img5=extras['img5'], img6=extras['img6'],
+        oferta=es_oferta
+    )
+    
+    db.session.add(nuevo_p)
+    db.session.commit()
+    flash('✅ Producto cargado exitosamente')
     return redirect(url_for('admin'))
 
-    @app.route('/update/<int:id>', methods=['POST'])
-    def update_producto(id):
-        prod = Producto.query.get(id)
-        if prod:
-            prod.nombre = request.form['nombre']
-            prod.precio = request.form['precio']
-            prod.categoria = request.form['categoria']
-            
-            file = request.files['imagen']
-            if file and file.filename != '':
-                filename = file.filename
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                prod.imagen = filename
-                
-            db.session.commit()
-        return redirect(url_for('admin'))
-    # RUTA 1: Muestra el formulario de edición (El que te da el error 404)
 @app.route('/editar/<int:id>')
 @requires_auth
 def editar(id):
-    # Buscamos el producto por su ID
     producto = Producto.query.get_or_404(id)
     return render_template('editar.html', p=producto)
 
-# RUTA 2: Recibe los datos del formulario y los guarda
 @app.route('/update/<int:id>', methods=['POST'])
 @requires_auth
 def update(id):
     producto = Producto.query.get_or_404(id)
-    
     producto.nombre = request.form['nombre']
-    producto.precio = request.form['precio']
+    producto.precio = float(request.form['precio'])
     producto.categoria = request.form['categoria']
+    producto.stock = int(request.form.get('stock', producto.stock))
+    producto.oferta = True if request.form.get('oferta') else False
+    producto.stock = request.form.get('stock')
     
-    # Manejo de la imagen opcional
     if 'imagen' in request.files:
         file = request.files['imagen']
-        if file.filename != '':
-            filename = file.filename
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             producto.imagen = filename
             
     db.session.commit()
-    flash('✅ Producto actualizado correctamente')
+    flash('✅ Producto actualizado')
     return redirect(url_for('admin'))
 
 @app.route('/delete/<int:id>')
 @requires_auth
 def delete_producto(id):
-    prod = db.session.get(Producto, id)
+    prod = Producto.query.get(id)
     if prod:
-        nombre_temp = prod.nombre
         db.session.delete(prod)
         db.session.commit()
-        flash(f'🗑️ Eliminado: {nombre_temp}')
+        flash('🗑️ Producto eliminado')
     return redirect(url_for('admin'))
 
 if __name__ == "__main__":
+    # 1. Primero creamos las tablas (esto soluciona el error del stock)
+    with app.app_context():
+        db.create_all()
+    
+    # 2. Después iniciamos el servidor
     app.run(debug=True)
