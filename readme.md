@@ -1,39 +1,44 @@
-🛍️ Shopping Ropa - Catálogo Digital
-Este proyecto es una aplicación web para gestionar el stock de ropa de los Puestos 129 y 130.
+# 🛍️ Shopping Ropa - Puestos 129 y 130
+Catálogo Digital y Sistema de Gestión de Stock.
 
-🚀 Cómo iniciar la página
-Abrí la terminal en la carpeta E:\shopping_ropa.
+## 🚀 Inicio Rápido (Local)
+1. **Carpeta:** `E:\shopping_ropa`
+2. **Comando:** `python app.py`
+3. **URL:** [http://localhost:5000](http://localhost:5000)
 
-Ejecutá el comando: python app.py.
+---
 
-Abrí tu navegador en: http://localhost:5000.
+## 🛠️ Panel de Control (Admin)
+| Acceso | Credenciales |
+| :--- | :--- |
+| **URL** | `/admin` |
+| **Usuario** | `admin` |
+| **Clave** | `admin` |
 
-🛠️ Panel de Administración
-Acceso: http://localhost:5000/admin
+### ✨ Funciones Principales:
+* **Gestión de Stock:** Carga de productos con hasta 6 imágenes.
+* **Control de Galería:** Las fotos se guardan automáticamente en `static/img`.
+* **Limpieza Automática:** Al eliminar un producto, se borra su imagen para no saturar el servidor.
+* **Optimización Móvil:** Diseño adaptado para celulares y botón directo de **WhatsApp**.
 
-Usuario: admin
+---
 
-Contraseña: admin
+## 📁 Estructura del Sistema
+* `app.py`: Motor principal de la aplicación.
+* `tienda.db`: Base de datos (SQLite) con todos los productos.
+* `static/`: Contiene imágenes (`img/`) y estilos visuales (`css/`).
+* `templates/`: Diseños HTML (Index, Admin, Editar).
 
-Funciones del Panel:
-Cargar: Seleccioná la foto desde tu compu, elegí el puesto y poné el precio. El sistema guardará la imagen sola en la carpeta static/img.
+---
 
-Editar: Permite cambiar precios o detalles de un producto ya cargado.
+## ✅ Mejoras Recientes (15/01/2026)
 
-Eliminar: Borra el producto de la web y también elimina el archivo de imagen de la carpeta para no ocupar espacio.
+### 🔐 Seguridad y Auditoría
+* **Registro de Vendedoras:** Se implementó `accesos_vendedoras.txt` que registra:
+    * 📅 Fecha y Hora (Ajustada a **Argentina**).
+    * 🌐 Dirección IP del dispositivo.
+    * 📄 Soporte **UTF-8** para lectura correcta en la nube.
+* **Cierre de Sesión:** Botón de Logout funcional con redirección segura al catálogo.
 
-Buscador: Podés filtrar por nombre para encontrar productos rápido.
-
-📱 Diseño Responsive
-La web está optimizada para celulares. Los clientes verán imágenes grandes y tendrán un botón flotante de WhatsApp para enviarte pedidos directamente.
-
-📁 Estructura del Proyecto
-app.py: Servidor Flask y lógica.
-
-tienda.db: Base de datos (SQLite).
-
-templates/: Archivos HTML (Diseño).
-
-static/img/: Carpeta donde se guardan las fotos de la ropa.
-
-static/css/: Estilos de colores y formas.
+### 📊 Gestión de Stock
+* **Contadores:** Se agregaron sumatorias automáticas de stock para Adultos e Niños en el panel superior.

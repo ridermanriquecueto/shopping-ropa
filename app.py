@@ -68,7 +68,7 @@ def admin():
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     
     # 3. Lo escribe en el "cuaderno" (archivo .txt)
-    with open("accesos_vendedoras.txt", "a") as f:
+    with open("accesos_vendedoras.txt", "a", encoding='utf-8') as f:
         f.write(f"Vendedora entró: {fecha} - IP: {ip}\n")
 
     productos = Producto.query.all()
