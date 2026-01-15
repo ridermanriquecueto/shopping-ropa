@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, Response, flash
+from flask import Flask, render_template, request, redirect, url_for, Response, flash, session
 from sqlalchemy import func
 import os
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from werkzeug.utils import secure_filename
+import datetime
 
 app = Flask(__name__)
 
@@ -59,6 +60,17 @@ def index():
 @app.route('/admin')
 @requires_auth
 def admin():
+    # 1. Crea la fecha
+    import datetime
+    fecha = (datetime.datetime.now() - datetime.timedelta(hours=3)).strftime("%d/%m/%Y %H:%M:%S")
+    
+    # 2. Atrapa la IP (identidad del celular/compu)
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    
+    # 3. Lo escribe en el "cuaderno" (archivo .txt)
+    with open("accesos_vendedoras.txt", "a") as f:
+        f.write(f"Vendedora entró: {fecha} - IP: {ip}\n")
+
     productos = Producto.query.all()
     
     # SUMA DE UNIDADES (Stock real)
@@ -152,6 +164,11 @@ def delete_producto(id):
         db.session.commit()
         flash('🗑️ Producto eliminado')
     return redirect(url_for('admin'))
+@app.route('/logout')
+def logout():
+    session.clear() 
+    # Como usas Basic Auth, al redirigir al index el navegador ya no mandará las credenciales
+    return redirect(url_for('index'))   
 
 if __name__ == "__main__":
     # 1. Primero creamos las tablas (esto soluciona el error del stock)

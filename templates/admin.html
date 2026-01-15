@@ -136,6 +136,12 @@ style="background-color: #000; color: white;">
             <a href="/" class="btn-edit" style="padding: 12px 20px; display: flex; align-items: center; gap: 8px;">
                 <span>👁️</span> Ver Catálogo
             </a>
+            <div style="text-align: right; padding: 10px 20px;">
+            <a href="{{ url_for('logout') }}" 
+            style="background-color: #d9534f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.3s;">
+            ❌ Cerrar Sesión
+    </a>
+</div>
         </div>
 
         <div class="admin-card">
@@ -183,6 +189,12 @@ style="background-color: #000; color: white;">
             </div>
         </div>
     </div>
+    <footer style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; font-size: 13px;">
+    <p>Gracias por usar el Admin de <strong>Shopping Ropa</strong></p>
+    <p style="color: #ff4b2b; font-style: italic;">
+        ⚠️ "No intentes robarme mi idea, ¡o te hackeo todo! Programado con ❤️ por Rdr."
+    </p>
+</footer>
 
     <script>
         // Buscador en tiempo real
