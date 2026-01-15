@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="UTF-8">
     <title>Shopping Ropa - Paseo de Compras La 33</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,6 +47,13 @@
     </style>
 </head>
 <body>
+    <body>
+    <button id="dark-mode-toggle" onclick="toggleDarkMode()" 
+        style="position: fixed; top: 15px; right: 15px; z-index: 3000; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; background: #333; color: white;">
+        🌙
+    </button>
+
+    ...
 
     {% macro render_producto(p, tel, nombre_vendedora) %}
     <div class="producto-card" data-categoria="{{ p.categoria }}">
@@ -84,10 +92,10 @@
             <div class="navbar-logo"><h1>🛍️ SHOPPING ROPA</h1></div>
             <ul class="navbar-menu">
                 <li><a href="javascript:void(0)" onclick="mostrarSeccion('inicio')" class="navbar-link">Inicio</a></li>
-                <li><a href="javascript:void(0)" onclick="mostrarSeccion('infantil')" class="navbar-link">👶 Infantil</a></li>
-                <li><a href="javascript:void(0)" onclick="mostrarSeccion('adultos')" class="navbar-link">👕 Adultos</a></li>
-                <li><a href="javascript:void(0)" onclick="mostrarSeccion('hacer-pedido')" class="navbar-link">📝 Pedidos</a></li>
-                <li><a href="javascript:void(0)" onclick="mostrarSeccion('contacto-page')" class="navbar-link">📞 Contacto</a></li>
+                <li><a href="javascript:void(0)" onclick="mostrarSeccion('infantil')" class="navbar-link"> Infantil</a></li>
+                <li><a href="javascript:void(0)" onclick="mostrarSeccion('adultos')" class="navbar-link"> Adultos</a></li>
+                <li><a href="javascript:void(0)" onclick="mostrarSeccion('hacer-pedido')" class="navbar-link"> Pedidos</a></li>
+                <li><a href="javascript:void(0)" onclick="mostrarSeccion('contacto-page')" class="navbar-link"> Contacto</a></li>
             </ul>
         </div>
     </nav>
@@ -98,18 +106,18 @@
                 <span class="badge-nuevo">TEMPORADA 2026</span>
                 <h1>🛍️ SHOPPING ROPA</h1>
                 <p class="subtitle" style="color: #fff; font-size: 1.3rem; margin-bottom: 5px;">Moda y calidad en el Paseo de Compras La 33</p>
-                <p style="color: #00d4ff; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px;">📍 Puestos 129 y 130</p>
+                <p style="color: #00d4ff; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px;">Puestos 129 y 130</p>
             </div>
 
             <div class="category-selector">
                 <div class="cat-card" onclick="mostrarSeccion('infantil')">
-                    <div class="cat-icon" style="font-size: 3.5rem;">👶</div>
+                    <div class="cat-icon" style="font-size: 3.5rem;"></div>
                     <h3 style="color: #fff;">INFANTIL</h3>
                     <span class="cat-btn">VER CATÁLOGO</span>
                 </div>
 
                 <div class="cat-card" onclick="mostrarSeccion('adultos')">
-                    <div class="cat-icon" style="font-size: 3.5rem;">👕</div>
+                    <div class="cat-icon" style="font-size: 3.5rem;"></div>
                     <h3 style="color: #fff;">ADULTOS</h3>
                     <span class="cat-btn">VER CATÁLOGO</span>
                 </div>
@@ -133,13 +141,13 @@
 
     <section id="infantil" class="puesto-section seccion-oculta">
         <div class="puesto-header">
-            <h2>👶 INDUMENTARIA POPY</h2>
+            <h2> INDUMENTARIA POPY</h2>
             <p class="puesto-subtitulo">Puesto 129 - Talles 4 al 16</p>
         </div>
         <div class="filtro-container">
             <button onclick="filtrarInfantil('todos')" class="btn-filtro">Todo Infantil</button>
-            <button onclick="filtrarInfantil('Nenes')" class="btn-filtro" style="background:#00d4ff;">👦 Nenes</button>
-            <button onclick="filtrarInfantil('Nenas')" class="btn-filtro" style="background:#ff69b4;">👧 Nenas</button>
+            <button onclick="filtrarInfantil('Nenes')" class="btn-filtro" style="background:#00d4ff;"> Nenes</button>
+            <button onclick="filtrarInfantil('Nenas')" class="btn-filtro" style="background:#ff69b4;"> Nenas</button>
         </div>
         <div class="catalogo-grid" id="grid-infantil">
             {% for p in infantiles %} {{ render_producto(p, '5492216769436', 'Popy') }} {% endfor %}
@@ -148,7 +156,7 @@
 
     <section id="adultos" class="puesto-section seccion-oculta">
         <div class="puesto-header">
-            <h2>👕 INDUMENTARIA DANIELA</h2>
+            <h2> INDUMENTARIA DANIELA</h2>
             <p class="puesto-subtitulo">Puesto 130 - Talles S al XXL</p>
         </div>
         <div class="catalogo-grid" id="grid-adultos">
@@ -158,7 +166,7 @@
 
     <section id="hacer-pedido" class="puesto-section seccion-oculta">
         <div class="formulario-pedido">
-            <h2>📝 TU PEDIDO</h2>
+            <h2> TU PEDIDO</h2>
             <p style="text-align: center; color: #888; margin-top: -30px; margin-bottom: 30px;">
                 Completá los datos y enviá tu lista por WhatsApp.
             </p>
@@ -182,14 +190,14 @@
             </div>
 
             <button onclick="enviarPedido()" class="btn-enviar-pedido">
-                🚀 ENVIAR PEDIDO POR WHATSAPP
+                    ENVIAR PEDIDO POR WHATSAPP
             </button>
         </div>
     </section>
     <section id="contacto-page" class="puesto-section" style="display: none; padding: 100px 20px 60px;">
     
     <div class="puesto-header" style="text-align: center; margin-bottom: 30px;">
-        <h2 style="color: #00d4ff; font-size: 1.8rem;">📞 CENTRO DE ATENCIÓN</h2>
+        <h2 style="color: #00d4ff; font-size: 1.8rem;"> CENTRO DE ATENCIÓN</h2>
         <p style="color: #ccc; font-size: 0.9rem;">Estamos para ayudarte.</p>
     </div>
 
@@ -197,8 +205,8 @@
         <div class="card-atencion">
             <h3 style="color: #25d366; font-size: 1rem; margin-bottom: 20px;">💬 WHATSAPP DIRECTO</h3>
             <div class="wa-buttons-container">
-                <a href="https://wa.me/5492216769436" target="_blank" class="btn-atencion-wa-mini">👶 Popy (129)</a>
-                <a href="https://wa.me/5492215570548" target="_blank" class="btn-atencion-wa-mini">👕 Dani (130)</a>
+                <a href="https://wa.me/5492216769436" target="_blank" class="btn-atencion-wa-mini"> Popy (129)</a>
+                <a href="https://wa.me/5492215570548" target="_blank" class="btn-atencion-wa-mini"> Dani (130)</a>
             </div>
         </div>
 
@@ -214,16 +222,16 @@
 
     <div class="caja-quejas-mini">
         <h3 style="color: #ff4444; font-size: 0.9rem; margin-bottom: 5px;">⚠️ ¿QUEJAS O SUGERENCIAS?</h3>
-        <p style="font-size: 1.5rem; color: #fff; font-weight: 900; margin: 5px 0;">📞 221-XXXXXXX</p>
+        <p style="font-size: 1.5rem; color: #fff; font-weight: 900; margin: 5px 0;"> 221-XXXXXXX</p>
     </div>
 </section>
     <footer class="footer-moderno">
         <div class="footer-container">
             
             <div class="footer-col">
-                <h2 class="footer-logo">🛍️ SHOPPING ROPA</h2>
+                <h2 class="footer-logo"> SHOPPING ROPA</h2>
                 <p style="color: #ccc; line-height: 1.8;">
-                    📍 <strong>VISÍTANOS:</strong><br>
+                     <strong>VISÍTANOS:</strong><br>
                     Paseo de Compras La 33<br>
                     Calle 33 y 134, La Plata.<br>
                     <span style="color: #00d4ff; font-weight: bold; font-size: 1.1rem;">Puestos 129 y 130</span>
@@ -233,14 +241,20 @@
             <div class="footer-col">
                 <h4>SÍGUENOS</h4>
                 <div class="redes-lista">
-                    <a href="https://instagram.com/TU_USUARIO" target="_blank" class="red-link">📸 Instagram</a>
-                    <a href="https://facebook.com/TU_USUARIO" target="_blank" class="red-link">🔵 Facebook</a>
-                    <a href="https://tiktok.com/@TU_USUARIO" target="_blank" class="red-link">🎵 TikTok</a>
-                </div>
+                <a href="https://instagram.com/TU_USUARIO" target="_blank" class="red-link">
+                    <i class="fab fa-instagram" style="color: #E1306C; font-size: 1.2rem;"></i> Instagram
+                </a>
+                <a href="https://facebook.com/TU_USUARIO" target="_blank" class="red-link">
+                    <i class="fab fa-facebook" style="color: #1877F2; font-size: 1.2rem;"></i> Facebook
+                </a>
+                <a href="https://tiktok.com/@TU_USUARIO" target="_blank" class="red-link">
+                    <i class="fab fa-tiktok" style="color: #fff; font-size: 1.2rem;"></i> TikTok
+                </a>
+            </div>
             </div>
 
             <div class="footer-col">
-                <h4>🕒 HORARIOS</h4>
+                <h4> HORARIOS</h4>
                 <p style="color: #aaa; line-height: 2;">
                     Sábados: <span style="color:#fff">10 a 20 hs</span><br>
                     Domingos: <span style="color:#fff">10 a 20 hs</span><br>
@@ -258,13 +272,16 @@
     </footer>
     
 
-    <div class="whatsapp-menu-container">
+     <div class="whatsapp-menu-container">
         <div class="whatsapp-options" id="waOptions">
-            <a href="https://wa.me/5492216769436" class="wa-option infantil" target="_blank">👶 Popy</a>
-            <a href="https://wa.me/5492215570548" class="wa-option adulto" target="_blank">👕 Daniela</a>
+            <a href="https://wa.me/5492216769436" class="wa-option infantil" target="_blank"> Popy</a>
+            <a href="https://wa.me/5492215570548" class="wa-option adulto" target="_blank"> Daniela</a>
         </div>
-        <button class="whatsapp-float" onclick="toggleWaMenu()">💬</button>
+        <button class="whatsapp-float" onclick="toggleWaMenu()" style="display: flex; align-items: center; justify-content: center;">
+            <i class="fab fa-whatsapp" style="font-size: 35px;"></i>
+        </button>
     </div>
+    
     
 
     <script>
@@ -344,6 +361,30 @@
         if(!nombre || !pedido) { alert("Completá los campos."); return; }
         window.open(`https://wa.me/${telefono}?text=${encodeURIComponent('Hola! Soy '+nombre+'. Pedido: '+pedido)}`, '_blank');
     }
+    function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle('light-mode');
+    
+    // Guardamos la preferencia
+    const mode = body.classList.contains('light-mode') ? 'light' : 'dark';
+    localStorage.setItem('theme', mode);
+    
+    actualizarIcono(mode);
+}
+
+function actualizarIcono(mode) {
+    const btn = document.getElementById('dark-mode-toggle');
+    btn.innerHTML = (mode === 'light') ? '☀️' : '🌙';
+}
+
+// Esto hace que al cargar la página sepa qué modo tenías puesto
+window.onload = function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        actualizarIcono('light');
+    }
+}
 </script>
 </body>
 </html>

@@ -13,16 +13,15 @@ html {
 
 body {
     font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-    /* FONDO ORIGINAL RESTABLECIDO */
-    background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url("../img/paseo33.png");
+    /* ACLARAMOS EL FILTRO: Pasamos de 0.85 a 0.70 y usamos un tono más azulado */
+    background-image: linear-gradient(rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.85)), url("../img/paseo33.png");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    color: #ffffff;
+    color: #f0f0f0; /* Blanco más suave */
     line-height: 1.6;
     overflow-x: hidden;
 }
-
 /* =========================================
     2. NAVBAR FIJO
    ========================================= */
@@ -40,6 +39,7 @@ body {
 .navbar-container {
     display: flex;
     justify-content: space-between;
+    
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
@@ -75,6 +75,7 @@ body {
    ========================================= */
 /* --- ESTILOS GENERALES DEL HERO --- */
 .hero {
+    margin-top: -40px;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -264,19 +265,25 @@ body {
 }
 
 .producto-card {
-    background: #111;
-    border: 1px solid #333;
+    background: #1e1e1e; /* Un gris oscuro "Premium" en lugar de negro puro */
+    border: 1px solid #444; /* Un borde un poco más claro para que se note el límite */
     border-radius: 20px;
     padding: 20px;
     text-align: center;
-    transition: 0.4s;
+    transition: all 0.4s ease; /* Transición más suave */
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4); /* Sombra para que la tarjeta "salte" del fondo */
 }
-
+.producto-card h3 {
+    color: #ffffff; /* Blanco puro para el título */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* Sombra para que se lea perfecto */
+}
+/* EFECTO CUANDO TOCÁS LA TARJETA (Muy bueno para celular) */
 .producto-card:hover {
-    border-color: #ffffff;
-    transform: translateY(-10px);
+    transform: translateY(-5px); /* La tarjeta sube un poquito */
+    border-color: #00d4ff; /* El borde se ilumina con tu azul característico */
+    box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2); /* Sombra azulada sutil */
 }
 
 .img-container {
@@ -601,7 +608,84 @@ body {
 .admin-secret-link:hover {
     color: #00d4ff;
 }
+/* Estilos para el Modo Día */
+body.light-mode {
+    background-color: #f4f4f4; /* Fondo gris muy clarito */
+    color: #1a1a1a; /* Letras casi negras */
+}
 
+.light-mode .hero, 
+.light-mode .puesto-section {
+    background-color: #ffffff; /* Secciones blancas */
+}
+
+.light-mode .producto-card {
+    background-color: #ffffff;
+    border: 1px solid #ddd; /* Bordes suaves */
+}
+
+.light-mode .producto-card h3 {
+    color: #333 !important; /* Nombre del producto en oscuro */
+}
+
+.light-mode .navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #ddd;
+}
+
+.light-mode .navbar-logo h1 {
+    color: #333 !important;
+}
+
+.light-mode .hero-text-card {
+    background: rgba(0, 0, 0, 0.05); /* Fondo muy suave para el texto */
+    color: #333;
+}
+/* --- MODO DÍA (Letras oscuras) --- */
+body.light-mode {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+}
+
+/* Forzamos que el menú, títulos y párrafos sean negros */
+.light-mode .navbar-logo h1, 
+.light-mode h2, 
+.light-mode h3, 
+.light-mode p,
+.light-mode .navbar-link,
+.light-mode label {
+    color: #1a1a1a !important;
+}
+
+/* Ajuste para las cards en modo día */
+.light-mode .producto-card, 
+.light-mode .admin-card, 
+.light-mode .formulario-pedido {
+    background-color: #f9f9f9 !important;
+    border: 1px solid #ddd !important;
+}
+
+/* Ajuste para la tabla del Admin en modo día */
+.light-mode table {
+    background-color: white !important;
+    color: #333 !important;
+}
+.light-mode th {
+    background-color: #eee !important;
+    color: #000 !important;
+}
+.light-mode td {
+    border-bottom: 1px solid #ddd !important;
+    color: #333 !important;
+}
+/* Estilos para Modo Día en Admin */
+body.light-mode { background-color: #f4f4f4 !important; color: #1a1a1a !important; }
+.light-mode .admin-container, .light-mode .admin-card { background: white !important; color: #333 !important; }
+.light-mode table { background: white !important; color: #333 !important; border: 1px solid #ddd; }
+.light-mode th { background: #eee !important; color: black !important; }
+.light-mode td { border-bottom: 1px solid #eee !important; color: #444 !important; }
+.light-mode h1, .light-mode h2, .light-mode h3, .light-mode label { color: #1a1a1a !important; }
+.light-mode input, .light-mode select, .light-mode textarea { background: white !important; color: black !important; border: 1px solid #ccc !important; }
 /* =========================================
     9. RESPONSIVE (MÓVIL)
    ========================================= */
