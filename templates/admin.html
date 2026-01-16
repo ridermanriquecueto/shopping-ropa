@@ -5,227 +5,194 @@
     <title>Panel Admin - Shopping Ropa</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
-        .admin-section { padding: 40px 20px; max-width: 1000px; margin: auto; font-family: sans-serif; }
+        /* Estilos Base (Dark) */
+        body { background-color: #000; color: white; transition: 0.3s; margin: 0; font-family: sans-serif; }
+        .admin-section { padding: 40px 20px; max-width: 1000px; margin: auto; }
         .admin-card { background: #111; padding: 25px; border-radius: 12px; border: 1px solid #333; margin-bottom: 30px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #000; color: white; border: 1px solid #444; border-radius: 6px; box-sizing: border-box; }
         
-        input, select { 
-            width: 100%; padding: 12px; margin: 8px 0; 
-            background: #000; color: white; border: 1px solid #444; border-radius: 6px; 
-            box-sizing: border-box;
-        }
+        /* Modo Claro (Light Mode) */
+        body.light-mode { background-color: #f4f4f4; color: #111; }
+        body.light-mode .admin-card { background: #fff; border-color: #ddd; }
+        body.light-mode input, body.light-mode select { background: #fff; color: #000; border-color: #ccc; }
+        body.light-mode .stats-box { background: #eee; color: #000; }
+        body.light-mode td { color: #333; border-bottom: 1px solid #ddd; }
 
+        /* Componentes */
         .search-input { border: 2px solid #00d4ff; font-size: 1rem; background: #000; color: white; padding: 12px; width: 100%; border-radius: 6px; }
-
-        .admin-table-container { 
-            background: #111; border-radius: 12px; padding: 10px; border: 1px solid #333; overflow-x: auto; 
-        }
+        .admin-table-container { background: #111; border-radius: 12px; padding: 10px; border: 1px solid #333; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th { background: #222; color: #00d4ff; padding: 15px; text-align: left; font-size: 0.85rem; border-bottom: 2px solid #333; }
         td { padding: 12px 15px; border-bottom: 1px solid #222; color: #eee; vertical-align: middle; }
-
-        .actions-cell { display: flex; gap: 10px; }
         
-        .btn-edit { 
-            color: #00d4ff; border: 1px solid #00d4ff; padding: 8px 15px; 
-            border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: bold; transition: 0.3s;
-        }
-        .btn-edit:hover { background: #00d4ff; color: #000; }
-
-        .btn-del { 
-            color: #ff4444; border: 1px solid #ff4444; padding: 8px 15px; 
-            border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: bold; transition: 0.3s;
-        }
-        .btn-del:hover { background: #ff4444; color: white; }
-
-        .btn-primary { background: #00d4ff; color: black; border: none; padding: 15px; font-weight: bold; cursor: pointer; width: 100%; border-radius: 6px; margin-top: 10px; font-size: 1rem; }
-        .btn-primary:hover { background: #00ace6; }
+        .btn-edit { color: #00d4ff; border: 1px solid #00d4ff; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: bold; }
+        .btn-del { color: #ff4444; border: 1px solid #ff4444; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: bold; }
+        .btn-primary { background: #00d4ff; color: black; border: none; padding: 15px; font-weight: bold; cursor: pointer; width: 100%; border-radius: 6px; margin-top: 10px; }
         
         .img-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #333; }
-        .stats-box { flex: 1; background: #222; padding: 15px; border-radius: 10px; text-align: center; transition: 0.3s; }
-        .stats-box:hover { transform: translateY(-5px); }
+        .stats-box { flex: 1; background: #222; padding: 15px; border-radius: 10px; text-align: center; }
     </style>
 </head>
-<body 
-style="background-color: #000; color: white;">
 <body>
-    <button id="dark-mode-toggle" onclick="toggleDarkMode()" 
-        style="position: fixed; top: 15px; right: 15px; z-index: 3000; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; background: #333; color: white;">
-        🌙
-    </button>
-
-    ...
+    <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="position: fixed; top: 15px; right: 15px; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; background: #333; color: white; z-index: 1000;">🌙</button>
 
     <div class="admin-section">
-        <h1 style="margin-bottom: 30px;">🛠️ Panel de Control</h1>
-
-        <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-            <div class="stats-box" style="border-left: 5px solid #00d4ff;">
-                <span style="color: #888; font-size: 0.8rem; display: block;">STOCK INFANTIL</span>
-                <strong style="color: #00d4ff; font-size: 1.8rem;">{{ total_infantil }}</strong> <span style="color: #eee;">prendas</span>
-            </div>
-            <div class="stats-box" style="border-left: 5px solid #ffcc00;">
-                <span style="color: #888; font-size: 0.8rem; display: block;">STOCK ADULTO</span>
-                <strong style="color: #ffcc00; font-size: 1.8rem;">{{ total_adulto }}</strong> <span style="color: #eee;">prendas</span>
-            </div>
-            <div class="stats-box" style="border-left: 5px solid #fff;">
-                <span style="color: #888; font-size: 0.8rem; display: block;">TOTAL GENERAL</span>
-                <strong style="color: #fff; font-size: 1.8rem;">{{ total_general }}</strong> <span style="color: #eee;">unidades</span>
-            </div>
-        </div>
+        <h1>🛠️ Panel de Control</h1>
 
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             {% for message in messages %}
-              <div style="padding: 15px; background: #111; color: #00d4ff; border: 1px solid #00d4ff; border-radius: 8px; margin-bottom: 20px; text-align: center; animation: fadeIn 0.5s;">
+              <div style="background: #00d4ff22; color: #00d4ff; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #00d4ff; text-align: center;">
                 {{ message }}
               </div>
             {% endfor %}
           {% endif %}
         {% endwith %}
 
+        <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+            <div class="stats-box" style="border-left: 5px solid #00d4ff;">
+                <span style="color: #888; font-size: 0.8rem; display: block;">STOCK INFANTIL</span>
+                <strong style="color: #00d4ff; font-size: 1.8rem;">{{ infantil }}</strong> <span style="color: #eee;">prendas</span>
+            </div>
+            <div class="stats-box" style="border-left: 5px solid #ffcc00;">
+                <span style="color: #888; font-size: 0.8rem; display: block;">STOCK ADULTO</span>
+                <strong style="color: #ffcc00; font-size: 1.8rem;">{{ adulto }}</strong> <span style="color: #eee;">prendas</span>
+            </div>
+            <div class="stats-box" style="border-left: 5px solid #fff;">
+                <span style="color: #888; font-size: 0.8rem; display: block;">TOTAL GENERAL</span>
+                <strong style="color: #fff; font-size: 1.8rem;">{{ total }}</strong> <span style="color: #eee;">unidades</span>
+            </div>
+        </div>
+
         <div class="admin-card">
             <h2 style="color: #fff; margin-top: 0;">➕ Cargar Nuevo Producto</h2>
             <form action="{{ url_for('add_producto') }}" method="POST" enctype="multipart/form-data">
-                <input type="text" name="nombre" placeholder="Nombre del producto (ej: Remera Oversize)" required>
+                <input type="text" name="nombre" placeholder="Nombre del producto" required>
                 
                 <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 0.7rem; color: #888;">PRECIO ($)</label>
-                        <input type="number" step="0.01" name="precio" placeholder="0.00" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-size: 0.7rem; color: #888;">STOCK (CANTIDAD)</label>
-                        <input type="number" name="stock" value="1" min="0" required>
-                    </div>
+                    <input type="number" step="0.01" name="precio" placeholder="Precio ($)" required style="flex:2;">
+                    <input type="number" name="stock" value="1" min="0" required style="flex:1;">
                 </div>
                 
-                <label style="font-size: 0.7rem; color: #888;">CATEGORÍA / PUESTO</label>
                 <select name="categoria" required>
                     <option value="Nenes">Puesto 129 - Nenes</option>
                     <option value="Nenas">Puesto 129 - Nenas</option>
-                    <option value="Infantil">Puesto 129 - Infantil General</option>
+                    <option value="Infantil General">Puesto 129 - Infantil General</option>
                     <option value="Adulto" selected>Puesto 130 - Adulto</option>
                 </select>
 
-                <div style="margin-top:15px; border: 1px solid #333; padding: 15px; border-radius: 8px;">
-                    <p style="color: #00d4ff; margin-bottom: 10px; font-weight: bold;">📸 Fotos del Producto (La primera es obligatoria):</p>
-                    <input type="file" name="imagen" accept="image/*" required>
-                    <p style="color: #666; font-size: 0.75rem; margin: 10px 0;">Fotos adicionales (Galería):</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <input type="file" name="img2" accept="image/*">
-                        <input type="file" name="img3" accept="image/*">
-                        <input type="file" name="img4" accept="image/*">
-                        <input type="file" name="img5" accept="image/*">
-                        <input type="file" name="img6" accept="image/*">
-                    </div>
+                <div style="margin-top:15px; border: 2px dashed #00d4ff; padding: 20px; border-radius: 12px; text-align: center; background: #0a0a0a;">
+                    <p style="color: #00d4ff; font-weight: bold; margin-bottom: 10px;">📸 CARGA RÁPIDA / CÁMARA</p>
+                    <input type="file" name="fotos_masivas" id="fotos_masivas" multiple accept="image/*" capture="environment" style="display: none;">
+                    <label for="fotos_masivas" style="background: #00d4ff; color: #000; padding: 15px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: inline-block; width: 80%;">
+                        📷 TOMAR O ELEGIR FOTOS (MÁX 6)
+                    </label>
+                    <div id="preview-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;"></div>
                 </div>
 
-                <div style="margin: 20px 0; display: flex; align-items: center; gap: 10px; background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px dashed #444;">
-                    <input type="checkbox" name="oferta" id="oferta" style="width: 20px; height: 20px; margin: 0; cursor: pointer;">
-                    <label for="oferta" style="color: #ffcc00; font-weight: bold; cursor: pointer;">🔥 ¡MARCAR COMO OFERTA ESPECIAL!</label>
+                <details style="margin-top: 15px; color: #888; font-size: 0.8rem;">
+                    <summary style="cursor: pointer;">Subir una por una (Opcional)</summary>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <input type="file" name="file1"> <input type="file" name="file2">
+                        <input type="file" name="file3"> <input type="file" name="file4">
+                        <input type="file" name="file5"> <input type="file" name="file6">
+                    </div>
+                </details>
+
+                <div style="margin: 20px 0; background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #333;">
+                    <input type="checkbox" name="oferta" id="oferta"> 
+                    <label for="oferta" style="color: #ffcc00; font-weight: bold;">🔥 MARCAR COMO OFERTA</label>
                 </div>
                 
-                <button type="submit" class="btn-primary">PUBLICAR PRODUCTO</button>
+                <button type="submit" class="btn-primary" style="height: 55px; font-size: 1.1rem;">PUBLICAR PRODUCTO</button>
             </form>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px;">
-            <div style="flex-grow: 1;">
-                <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por nombre de producto...">
-            </div>
-            <a href="/" class="btn-edit" style="padding: 12px 20px; display: flex; align-items: center; gap: 8px;">
-                <span>👁️</span> Ver Catálogo
+       
+
+        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 20px; width: 100%;">
+            <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar..." 
+                style="flex: 1; margin: 0; min-width: 0; padding: 12px 5px; font-size: 0.9rem;">
+
+            <a href="/" class="btn-edit" 
+            style="flex: 1.2; padding: 12px 0; text-align: center; font-size: 0.85rem; display: block; white-space: nowrap; background: #00d4ff; color: black; border: none;">
+                👁️ VER CATÁLOGO
             </a>
-            <div style="text-align: right; padding: 10px 20px;">
+
             <a href="{{ url_for('logout') }}" 
-            style="background-color: #d9534f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.3s;">
-            ❌ Cerrar Sesión
-    </a>
-</div>
+            style="flex: 0.8; background: #d9534f; color: white; padding: 12px 0; border-radius: 6px; text-decoration: none; text-align: center; font-weight: bold; font-size: 0.85rem; white-space: nowrap;">
+                ❌ SALIR
+            </a>
         </div>
 
-        <div class="admin-card">
-            <h2 style="color: #00d4ff; margin-top: 0;">📦 Gestión de Inventario</h2>
-            <div class="admin-table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Imagen</th>
-                            <th>Producto</th>
-                            <th>Categoría</th>
-                            <th>Stock</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-productos">
-                        {% for p in productos %}
-                        <tr class="item-producto">
-                            <td>
-                                {% if p.imagen %}
-                                <img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="img-thumb">
-                                {% else %}
-                                <div class="img-thumb" style="background: #222; display: flex; align-items: center; justify-content: center; font-size: 0.6rem;">SIN FOTO</div>
-                                {% endif %}
-                            </td>
-                            <td class="nombre-prod">
-                                <strong>{{ p.nombre }}</strong>
-                                {% if p.oferta %}<span style="color: #ffcc00; font-size: 0.7rem; display: block;">🔥 OFERTA</span>{% endif %}
-                            </td>
-                            <td><span style="background: #222; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">{{ p.categoria }}</span></td>
-                            <td>
-                                <strong style="color: {{ 'white' if p.stock > 0 else '#ff4444' }};">{{ p.stock }}</strong> 
-                                <span style="color: #666; font-size: 0.8rem;">unid.</span>
-                            </td>
-                            <td style="color: #00d4ff; font-weight: bold;">${{ p.precio }}</td>
-                            <td class="actions-cell">
-                                <a href="{{ url_for('editar', id=p.id) }}" class="btn-edit">EDITAR</a>
-                                <a href="{{ url_for('delete_producto', id=p.id) }}" class="btn-del" onclick="return confirm('¿Estás seguro de eliminar {{ p.nombre }}?')">BORRAR</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="admin-table-container">
+            <table>
+                <thead>
+                    <tr><th>Imagen</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-productos">
+                    {% for p in productos %}
+                    <tr class="item-producto">
+                        <td><img src="{{ url_for('static', filename='img/' + p.imagen) if p.imagen else '' }}" class="img-thumb"></td>
+                        <td class="nombre-prod"><strong>{{ p.nombre }}</strong></td>
+                        <td>{{ p.categoria }}</td>
+                        <td>{{ p.stock }}</td>
+                        <td>${{ p.precio }}</td>
+                        <td>
+                            <a href="{{ url_for('editar', id=p.id) }}" class="btn-edit">EDITAR</a>
+                           
+                            <a href="{{ url_for('delete_producto', id=p.id) }}" class="btn-del" onclick="return confirm('¿Borrar?')">BORRAR</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+
+        <footer style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; font-size: 13px;">
+            <p>Gracias por usar el Admin de <strong>Shopping Ropa</strong></p>
+            <p style="color: #ff4b2b; font-style: italic;">
+                ⚠️ "No intentes robarme mi idea, ¡o te hackeo todo! Programado con ❤️ por Rdr."
+            </p>
+        </footer>
     </div>
-    <footer style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; font-size: 13px;">
-    <p>Gracias por usar el Admin de <strong>Shopping Ropa</strong></p>
-    <p style="color: #ff4b2b; font-style: italic;">
-        ⚠️ "No intentes robarme mi idea, ¡o te hackeo todo! Programado con ❤️ por Rdr."
-    </p>
-</footer>
-
+    
     <script>
-        // Buscador en tiempo real
+        // Buscador
         document.getElementById('buscador').addEventListener('keyup', function() {
             let filtro = this.value.toLowerCase();
-            let filas = document.querySelectorAll('.item-producto');
-            filas.forEach(fila => {
+            document.querySelectorAll('.item-producto').forEach(fila => {
                 let nombre = fila.querySelector('.nombre-prod').textContent.toLowerCase();
                 fila.style.display = nombre.includes(filtro) ? "" : "none";
             });
         });
+
+        // Modo Oscuro / Claro
         function toggleDarkMode() {
-            const body = document.body;
-            body.classList.toggle('light-mode');
-            const mode = body.classList.contains('light-mode') ? 'light' : 'dark';
-            localStorage.setItem('theme', mode); // Guarda la elección
-            actualizarIcono(mode);
-        }
-
-        function actualizarIcono(mode) {
+            document.body.classList.toggle('light-mode');
             const btn = document.getElementById('dark-mode-toggle');
-            if(btn) btn.innerHTML = (mode === 'light') ? '☀️' : '🌙';
+            btn.innerHTML = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
         }
 
-        // Al cargar el Admin, revisa qué modo elegiste en el Index
-        window.addEventListener('DOMContentLoaded', (event) => {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-mode');
-                actualizarIcono('light');
-            }
+        // Preview de imágenes
+        document.getElementById('fotos_masivas').addEventListener('change', function(e) {
+            const container = document.getElementById('preview-container');
+            container.innerHTML = '';
+            const files = Array.from(e.target.files).slice(0, 6);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.style.width = '100%';
+                    img.style.height = '70px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '5px';
+                    img.style.border = '1px solid #00d4ff';
+                    container.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            });
         });
     </script>
 </body>

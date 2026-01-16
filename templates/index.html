@@ -53,18 +53,20 @@
         🌙
     </button>
 
-    ...
-
-    {% macro render_producto(p, tel, nombre_vendedora) %}
+   {% macro render_producto(p, tel, nombre_vendedora) %}
     <div class="producto-card" data-categoria="{{ p.categoria }}">
         {% if p.oferta %}<div class="badge-oferta">🔥 OFERTA</div>{% endif %}
         <div class="img-container">
             <button class="btn-flecha" style="left: 5px;" onclick="pasarFoto('{{ p.id }}', -1)">❮</button>
-            <img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="producto-img" id="main-{{ p.id }}" data-index="0">
+            
+            {# ESTA ES LA LÍNEA CLAVE CORREGIDA: #}
+            <img src="{{ url_for('static', filename='img/' + p.imagen) if p.imagen else '' }}" class="producto-img" id="main-{{ p.id }}" data-index="0">
+            
             <button class="btn-flecha" style="right: 5px;" onclick="pasarFoto('{{ p.id }}', 1)">❯</button>
         </div>
         <div id="lista-{{ p.id }}" style="display: none;">
-            <span>{{ url_for('static', filename='img/' + p.imagen) }}</span>
+            {# AQUÍ AGREGAMOS SEGURIDAD PARA LAS 6 FOTOS #}
+            {% if p.imagen %}<span>{{ url_for('static', filename='img/' + p.imagen) }}</span>{% endif %}
             {% if p.img2 %}<span>{{ url_for('static', filename='img/' + p.img2) }}</span>{% endif %}
             {% if p.img3 %}<span>{{ url_for('static', filename='img/' + p.img3) }}</span>{% endif %}
             {% if p.img4 %}<span>{{ url_for('static', filename='img/' + p.img4) }}</span>{% endif %}
@@ -72,7 +74,7 @@
             {% if p.img6 %}<span>{{ url_for('static', filename='img/' + p.img6) }}</span>{% endif %}
         </div>
         <div class="galeria-miniaturas" style="display: flex; gap: 4px; margin-top: 8px; justify-content: center; flex-wrap: wrap;">
-            <img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="thumb-img" onclick="actualizarFotoCarrusel('{{ p.id }}', 0)">
+            {% if p.imagen %}<img src="{{ url_for('static', filename='img/' + p.imagen) }}" class="thumb-img" onclick="actualizarFotoCarrusel('{{ p.id }}', 0)">{% endif %}
             {% if p.img2 %}<img src="{{ url_for('static', filename='img/' + p.img2) }}" class="thumb-img" onclick="actualizarFotoCarrusel('{{ p.id }}', 1)">{% endif %}
             {% if p.img3 %}<img src="{{ url_for('static', filename='img/' + p.img3) }}" class="thumb-img" onclick="actualizarFotoCarrusel('{{ p.id }}', 2)">{% endif %}
         </div>

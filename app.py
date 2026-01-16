@@ -60,29 +60,34 @@ def index():
 @app.route('/admin')
 @requires_auth
 def admin():
-    # 1. Crea la fecha
+    # 1. Registro de acceso (esto lo dejamos igual porque funciona bien)
     import datetime
     fecha = (datetime.datetime.now() - datetime.timedelta(hours=3)).strftime("%d/%m/%Y %H:%M:%S")
-    
-    # 2. Atrapa la IP (identidad del celular/compu)
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    
-    # 3. Lo escribe en el "cuaderno" (archivo .txt)
     with open("accesos_vendedoras.txt", "a", encoding='utf-8') as f:
         f.write(f"Vendedora entró: {fecha} - IP: {ip}\n")
 
+    # 2. Obtener todos los productos para la tabla
     productos = Producto.query.all()
     
-    # SUMA DE UNIDADES (Stock real)
-    total_infantil = db.session.query(func.sum(Producto.stock)).filter(Producto.categoria.in_(['Nenes', 'Nenas', 'Infantil'])).scalar() or 0
-    total_adulto = db.session.query(func.sum(Producto.stock)).filter(Producto.categoria.in_(['Adulto', 'Adultos'])).scalar() or 0
-    total_general = db.session.query(func.sum(Producto.stock)).scalar() or 0
+    # 3. SUMA DE STOCK REAL (Asegurate de que los nombres coincidan con tu HTML)
+    # Cambiamos 'total_infantil' por 'infantil' para que el HTML lo reconozca
+    stock_infantil = db.session.query(func.sum(Producto.stock)).filter(
+        Producto.categoria.in_(['Nenes', 'Nenas', 'Infantil General'])
+    ).scalar() or 0
 
+    stock_adulto = db.session.query(func.sum(Producto.stock)).filter(
+        Producto.categoria.in_(['Adulto', 'Puesto 130 - Adulto'])
+    ).scalar() or 0
+
+    stock_general = db.session.query(func.sum(Producto.stock)).scalar() or 0
+
+    # 4. Enviar al HTML con los nombres de variable correctos
     return render_template('admin.html', 
                            productos=productos, 
-                           total_infantil=total_infantil, 
-                           total_adulto=total_adulto,
-                           total_general=total_general)
+                           infantil=stock_infantil,  # Aquí está la clave
+                           adulto=stock_adulto,      # Aquí también
+                           total=stock_general)      # Y aquí
 
 @app.route('/add', methods=['POST'])
 @requires_auth
@@ -91,40 +96,51 @@ def add_producto():
     precio = request.form['precio']
     categoria = request.form['categoria']
     stock = request.form.get('stock', 1) 
-    es_oferta = True if request.form.get('oferta') else False
+    es_oferta = 'oferta' in request.form
     
-    # 1. Foto Principal
-    f_principal = request.files['imagen']
-    filename_p = secure_filename(f_principal.filename)
-    f_principal.save(os.path.join(app.config['UPLOAD_FOLDER'], filename_p))
-    
-    # 2. Fotos Extras
-    extras = {}
-    for i in range(2, 7):
-        campo = f'img{i}'
-        file = request.files.get(campo)
-        if file and file.filename != '':
-            fname = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
-            extras[campo] = fname
-        else:
-            extras[campo] = None
-
-    # 3. Guardar en la Base de Datos
+    # 1. Crear el producto primero (para obtener el ID)
     nuevo_p = Producto(
         nombre=nombre, 
         precio=float(precio), 
         categoria=categoria, 
         stock=int(stock),
-        imagen=filename_p,
-        img2=extras['img2'], img3=extras['img3'], img4=extras['img4'],
-        img5=extras['img5'], img6=extras['img6'],
         oferta=es_oferta
     )
-    
     db.session.add(nuevo_p)
+    db.session.flush() # ID generado
+
+    # 2. Procesar fotos individuales (file1 a file6)
+    mapeo = {
+        'file1': 'imagen', 'file2': 'img2', 'file3': 'img3',
+        'file4': 'img4', 'file5': 'img5', 'file6': 'img6'
+    }
+
+    for input_name, col_db in mapeo.items():
+        archivo = request.files.get(input_name)
+        if archivo and archivo.filename != '':
+            ext = os.path.splitext(archivo.filename)[1]
+            nombre_foto = f"prod_{nuevo_p.id}_{input_name}{ext}"
+            archivo.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_foto))
+            setattr(nuevo_p, col_db, nombre_foto)
+
+    # 3. PROCESAR CARGA POR LOTE / CÁMARA (fotos_masivas)
+    # Esto llena los huecos que hayan quedado vacíos arriba
+    fotos_masivas = request.files.getlist('fotos_masivas')
+    columnas_totales = ['imagen', 'img2', 'img3', 'img4', 'img5', 'img6']
+    
+    if fotos_masivas and fotos_masivas[0].filename != '':
+        for f in fotos_masivas:
+            # Buscamos la primera columna que esté vacía
+            for col in columnas_totales:
+                if not getattr(nuevo_p, col): 
+                    ext = os.path.splitext(f.filename)[1]
+                    nom_m = f"prod_{nuevo_p.id}_{col}_cam{ext}"
+                    f.save(os.path.join(app.config['UPLOAD_FOLDER'], nom_m))
+                    setattr(nuevo_p, col, nom_m)
+                    break # Pasamos a la siguiente foto del lote
+
     db.session.commit()
-    flash('✅ Producto cargado exitosamente')
+    flash('✅ Producto y fotos cargados exitosamente')
     return redirect(url_for('admin'))
 
 @app.route('/editar/<int:id>')
@@ -133,26 +149,63 @@ def editar(id):
     producto = Producto.query.get_or_404(id)
     return render_template('editar.html', p=producto)
 
+
 @app.route('/update/<int:id>', methods=['POST'])
 @requires_auth
 def update(id):
-    producto = Producto.query.get_or_404(id)
-    producto.nombre = request.form['nombre']
-    producto.precio = float(request.form['precio'])
-    producto.categoria = request.form['categoria']
-    producto.stock = int(request.form.get('stock', producto.stock))
-    producto.oferta = True if request.form.get('oferta') else False
-    producto.stock = request.form.get('stock')
+    p = Producto.query.get_or_404(id)
     
-    if 'imagen' in request.files:
-        file = request.files['imagen']
-        if file and file.filename != '':
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            producto.imagen = filename
+    # 1. Actualizar textos básicos
+    p.nombre = request.form.get('nombre')
+    p.precio = float(request.form.get('precio'))
+    p.stock = int(request.form.get('stock'))
+    p.categoria = request.form.get('categoria')
+    p.oferta = 'oferta' in request.form
+
+    # 2. Lógica para BORRAR fotos (Antes de subir las nuevas)
+    columnas_galeria = ['img2', 'img3', 'img4', 'img5', 'img6']
+    for col in columnas_galeria:
+        if request.form.get(f'borrar_{col}'):
+            # Si el usuario tildó "Borrar", ponemos la columna en blanco
+            setattr(p, col, None)
+
+    # 3. Procesar Subida de fotos individuales (file1 a file6)
+    mapeo_fotos = {
+        'file1': 'imagen',
+        'file2': 'img2',
+        'file3': 'img3',
+        'file4': 'img4',
+        'file5': 'img5',
+        'file6': 'img6'
+    }
+
+    for input_nombre, columna_db in mapeo_fotos.items():
+        archivo = request.files.get(input_nombre)
+        if archivo and archivo.filename != '':
+            # Generamos nombre: prod_ID_campo.jpg
+            extension = os.path.splitext(archivo.filename)[1]
+            nombre_final = f"prod_{id}_{input_nombre}{extension}"
             
+            # Guardamos el archivo físico
+            archivo.save(os.path.join('static/img', nombre_final))
+            
+            # Guardamos en la base de datos
+            setattr(p, columna_db, nombre_final)
+
+    # 4. Procesar Carga Masiva (WhatsApp)
+    # Solo llena las columnas que estén vacías después de los pasos anteriores
+    fotos_masivas = request.files.getlist('fotos_masivas')
+    if fotos_masivas and fotos_masivas[0].filename != '':
+        for f in fotos_masivas:
+            for col in columnas_galeria:
+                if not getattr(p, col): # Si el espacio está vacío
+                    ext = os.path.splitext(f.filename)[1]
+                    nom_m = f"prod_{id}_{col}_masiva{ext}"
+                    f.save(os.path.join('static/img', nom_m))
+                    setattr(p, col, nom_m)
+                    break # Salta a la siguiente foto masiva
+
     db.session.commit()
-    flash('✅ Producto actualizado')
     return redirect(url_for('admin'))
 
 @app.route('/delete/<int:id>')
