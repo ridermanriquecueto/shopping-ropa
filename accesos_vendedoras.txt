@@ -42,3 +42,4 @@ Vendedora entró: 16/01/2026 15:28:46 - IP: 127.0.0.1
 Vendedora entró: 16/01/2026 15:29:31 - IP: 127.0.0.1
 Vendedora entró: 23/01/2026 12:38:57 - IP: 127.0.0.1
 Vendedora entró: 23/01/2026 12:42:15 - IP: 127.0.0.1
+Vendedora entró: 28/01/2026 06:51:27 - IP: 127.0.0.1

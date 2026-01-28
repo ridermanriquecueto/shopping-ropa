@@ -686,6 +686,21 @@ body.light-mode { background-color: #f4f4f4 !important; color: #1a1a1a !importan
 .light-mode td { border-bottom: 1px solid #eee !important; color: #444 !important; }
 .light-mode h1, .light-mode h2, .light-mode h3, .light-mode label { color: #1a1a1a !important; }
 .light-mode input, .light-mode select, .light-mode textarea { background: white !important; color: black !important; border: 1px solid #ccc !important; }
+
+.btn-cancel { 
+    background: #333; 
+    color: white; 
+    border: 1px solid #444; 
+    padding: 15px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    width: 100%; 
+    border-radius: 6px; 
+    margin-top: 10px; 
+    text-decoration: none;
+    display: block;
+    text-align: center;
+}
 /* =========================================
     9. RESPONSIVE (MÓVIL)
    ========================================= */
